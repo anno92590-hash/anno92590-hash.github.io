@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Moray — Spectrally Parameterized Neural Inverse Reconstruction</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300..900,0..100,0..1&family=Newsreader:opsz,wght@6..72,300..600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:        #ece7dc;
+    --ink-dim:    #a9a395;
+    --ink-faint:  #6b665b;
+    --paper:      #0e0d0b;
+    --rule:       #2a2620;
+    --accent:     #e8a33a;
+    --accent-2:   #4ec3c0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Newsreader', Georgia, serif;
+    font-weight: 380;
+    font-size: 18px;
+    line-height: 1.62;
+    font-feature-settings: 'liga', 'kern', 'onum';
+    overflow-x: hidden;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(232,163,58,0.07), transparent 70%);
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0.03;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+
+  .frame {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 120px 32px 100px;
+  }
+
+  /* Static spectrum motif */
+  .spectrum {
+    width: 100%;
+    height: 70px;
+    margin-bottom: 56px;
+    display: block;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-variation-settings: 'opsz' 144, 'WONK' 1;
+    font-weight: 380;
+    font-size: clamp(44px, 7vw, 78px);
+    line-height: 0.98;
+    letter-spacing: -0.025em;
+    margin-bottom: 28px;
+  }
+  h1 .name {
+    font-style: italic;
+    font-variation-settings: 'opsz' 144, 'SOFT' 100, 'WONK' 1;
+    color: var(--accent);
+    font-weight: 400;
+  }
+
+  .status {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 80px;
+  }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, var(--rule), transparent);
+  }
+
+  .abstract {
+    font-size: 19px;
+    line-height: 1.7;
+    color: var(--ink);
+    font-weight: 350;
+    text-wrap: pretty;
+  }
+  .abstract p { margin-bottom: 1.1em; }
+  .abstract p:last-child { margin-bottom: 0; }
+
+  .abstract em {
+    font-style: italic;
+    color: var(--accent-2);
+    font-weight: 420;
+  }
+
+  .abstract strong {
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  footer {
+    margin-top: 100px;
+    padding-top: 28px;
+    border-top: 1px solid var(--rule);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    text-align: center;
+  }
+
+  @media (max-width: 720px) {
+    .frame { padding: 64px 24px 80px; }
+    h1 { font-size: 40px; }
+    .status { font-size: 10px; margin-bottom: 60px; }
+    .abstract { font-size: 17px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="frame">
+
+  <svg class="spectrum" viewBox="0 0 760 70" preserveAspectRatio="none" aria-hidden="true">
+    <defs>
+      <linearGradient id="fade" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%"  stop-color="#e8a33a" stop-opacity="0"/>
+        <stop offset="15%" stop-color="#e8a33a" stop-opacity="1"/>
+        <stop offset="85%" stop-color="#e8a33a" stop-opacity="1"/>
+        <stop offset="100%" stop-color="#e8a33a" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <g id="bars" stroke="url(#fade)" stroke-width="1.2" stroke-linecap="round"></g>
+  </svg>
+
+  <h1>
+    <span class="name">Moray.</span><br>
+    Spectrally Parameterized<br>
+    Neural Inverse Reconstruction
+  </h1>
+
+  <div class="status">
+    Anonymous Submission
+  </div>
+
+  <div class="section-label">Abstract</div>
+
+  <div class="abstract">
+    <p>In neural inverse reconstruction, the forward model is typically treated as a fixed simulator that maps a neural scene representation to measurements. This work studies how the parameterization of the forward operator itself shapes the optimization landscape of coherent inverse problems.</p>
+
+    <p>We introduce <strong>Moray</strong>, a reconstruction framework built on <em>spectrally parameterized forward operators</em> that bypass conventional time-domain synthesis and instead evaluate measurements directly through closed-form spectral kernels. This parameterization induces a substantially shorter and better-conditioned differentiable graph compared to time-domain approaches.</p>
+
+    <p>We further introduce <em>Phase-Coherent Manifold Parameterization</em>, a scene representation that jointly learns scene reflectivity and a deformable surface manifold, allowing the reconstruction to adapt to geometric deviations from the assumed imaging plane and thereby reducing common artifacts in coherent reconstruction.</p>
+
+    <p>We instantiate these ideas for 77&nbsp;GHz radar imaging using real measurements from a synthetic-aperture mmWave system. Across multiple challenging scenes, Moray consistently improves reconstruction fidelity, suppresses background artifacts, and degrades more gracefully under data limitations. More broadly, the results suggest that, in neural inverse problems, exposing the appropriate analytical structure of the sensing physics to the optimizer can be as important as the choice of neural representation itself.</p>
+  </div>
+
+  <footer>
+    Code &amp; data forthcoming
+  </footer>
+
+</div>
+
+<script>
+  // Static spectrum — generated once on load, no animation
+  (function () {
+    const g = document.getElementById('bars');
+    const N = 120;
+    const W = 760;
+    const H = 70;
+    const step = W / N;
+
+    // Deterministic pseudo-random so layout doesn't shift between reloads visually
+    let seed = 42;
+    function rand() {
+      seed = (seed * 9301 + 49297) % 233280;
+      return seed / 233280;
+    }
+
+    function envelope(i) {
+      const x = i / N;
+      const peak1 = Math.exp(-Math.pow((x - 0.32) * 9, 2)) * 0.85;
+      const peak2 = Math.exp(-Math.pow((x - 0.64) * 11, 2)) * 0.65;
+      const peak3 = Math.exp(-Math.pow((x - 0.78) * 22, 2)) * 0.40;
+      const floor = 0.06 + 0.04 * Math.sin(x * 19);
+      return Math.min(1, peak1 + peak2 + peak3 + floor + rand() * 0.08);
+    }
+
+    for (let i = 0; i < N; i++) {
+      const v = envelope(i);
+      const h = v * (H - 8);
+      const x = i * step + step / 2;
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', x.toFixed(2));
+      line.setAttribute('x2', x.toFixed(2));
+      line.setAttribute('y1', (H - h).toFixed(2));
+      line.setAttribute('y2', H);
+      g.appendChild(line);
+    }
+  })();
+</script>
+
+</body>
+</html>
