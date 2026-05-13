@@ -4,225 +4,811 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Moray — Spectrally Parameterized Neural Inverse Reconstruction</title>
+<meta name="description" content="A spectrally parameterized forward model and phase-coherent manifold parameterization for coherent neural inverse reconstruction.">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300..900,0..100,0..1&family=Newsreader:opsz,wght@6..72,300..600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Source+Serif+4:opsz,wght@8..60,300;8..60,400;8..60,500;8..60,600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+
 <style>
   :root {
-    --ink:        #ece7dc;
-    --ink-dim:    #a9a395;
-    --ink-faint:  #6b665b;
-    --paper:      #0e0d0b;
-    --rule:       #2a2620;
-    --accent:     #e8a33a;
-    --accent-2:   #4ec3c0;
+    --bg: #ffffff;
+    --ink: #131210;
+    --ink-soft: #5e564c;
+    --ink-faint: #9c948a;
+    --accent: #c08a2a;
+    --accent-soft: #f6ecd4;
+    --rule: #ebe6dc;
+    --maxw: 720px;
+    --maxw-wide: 1020px;
   }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
 
   body {
-    background: var(--paper);
+    margin: 0;
+    background: var(--bg);
     color: var(--ink);
-    font-family: 'Newsreader', Georgia, serif;
-    font-weight: 380;
+    font-family: 'Source Serif 4', Georgia, serif;
     font-size: 18px;
-    line-height: 1.62;
-    font-feature-settings: 'liga', 'kern', 'onum';
-    overflow-x: hidden;
-    background-image:
-      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(232,163,58,0.07), transparent 70%);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
 
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 100;
-    opacity: 0.03;
-    mix-blend-mode: overlay;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
-  }
+  .container { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+  .container-wide { max-width: var(--maxw-wide); margin: 0 auto; padding: 0 24px; }
 
-  .frame {
-    max-width: 760px;
-    margin: 0 auto;
-    padding: 120px 32px 100px;
-  }
-
-  /* Static spectrum motif */
-  .spectrum {
-    width: 100%;
-    height: 70px;
-    margin-bottom: 56px;
-    display: block;
-  }
-
-  h1 {
-    font-family: 'Fraunces', serif;
-    font-variation-settings: 'opsz' 144, 'WONK' 1;
-    font-weight: 380;
-    font-size: clamp(44px, 7vw, 78px);
-    line-height: 0.98;
-    letter-spacing: -0.025em;
-    margin-bottom: 28px;
-  }
-  h1 .name {
-    font-style: italic;
-    font-variation-settings: 'opsz' 144, 'SOFT' 100, 'WONK' 1;
-    color: var(--accent);
-    font-weight: 400;
-  }
-
-  .status {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--ink-faint);
-    margin-bottom: 80px;
-  }
-
-  .section-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.24em;
-    text-transform: uppercase;
-    color: var(--ink-faint);
-    margin-bottom: 24px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
-  .section-label::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: linear-gradient(to right, var(--rule), transparent);
-  }
-
-  .abstract {
-    font-size: 19px;
-    line-height: 1.7;
-    color: var(--ink);
-    font-weight: 350;
-    text-wrap: pretty;
-  }
-  .abstract p { margin-bottom: 1.1em; }
-  .abstract p:last-child { margin-bottom: 0; }
-
-  .abstract em {
-    font-style: italic;
-    color: var(--accent-2);
-    font-weight: 420;
-  }
-
-  .abstract strong {
-    font-weight: 500;
-    color: var(--ink);
-  }
-
-  footer {
-    margin-top: 100px;
-    padding-top: 28px;
-    border-top: 1px solid var(--rule);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--ink-faint);
+  /* ============ HERO ============ */
+  header.hero {
+    padding: 72px 0 48px 0;
     text-align: center;
   }
 
+  .logo {
+    width: 96px;
+    height: 96px;
+    object-fit: contain;
+    margin-bottom: 20px;
+    filter: drop-shadow(0 3px 10px rgba(192, 138, 42, 0.15));
+  }
+
+  .venue {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 24px;
+  }
+
+  h1.title {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 500;
+    font-size: clamp(2rem, 4.6vw, 3rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin: 0 auto 18px auto;
+    max-width: 680px;
+  }
+
+  .title .moray-word {
+    color: var(--accent);
+    font-style: italic;
+  }
+
+  .tagline {
+    font-family: 'Source Serif 4', serif;
+    font-size: 1.08rem;
+    color: var(--ink-soft);
+    font-style: italic;
+    max-width: 560px;
+    margin: 0 auto 28px auto;
+    line-height: 1.5;
+  }
+
+  .authors {
+    color: var(--ink-soft);
+    margin: 22px 0 4px 0;
+    font-size: 0.98rem;
+    font-style: italic;
+  }
+  .affiliation {
+    color: var(--ink-faint);
+    margin: 0 0 28px 0;
+    font-size: 0.9rem;
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+  }
+
+  .link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 18px;
+    border: 1px solid var(--ink);
+    border-radius: 100px;
+    color: var(--ink);
+    text-decoration: none;
+    font-family: 'Source Serif 4', serif;
+    font-size: 0.92rem;
+    font-weight: 500;
+    transition: all 0.15s ease;
+    background: transparent;
+  }
+  .link-btn:hover { background: var(--ink); color: var(--bg); }
+  .link-btn.accent { background: var(--accent); border-color: var(--accent); color: white; }
+  .link-btn.accent:hover { background: var(--ink); border-color: var(--ink); }
+
+  /* ============ SECTIONS ============ */
+  section { padding: 56px 0; }
+  section + section { border-top: 1px solid var(--rule); }
+
+  h2 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 500;
+    font-size: 1.6rem;
+    letter-spacing: -0.01em;
+    margin: 0 0 20px 0;
+  }
+
+  p { margin: 0 0 16px 0; }
+  a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-soft); }
+  a:hover { border-bottom-color: var(--accent); }
+  em { font-style: italic; }
+  strong { font-weight: 600; }
+
+  /* ============ HERO TEASER ============ */
+  .hero-teaser {
+    max-width: var(--maxw-wide);
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  .placeholder {
+    background: #fbf9f4;
+    border: 1px dashed var(--rule);
+    border-radius: 6px;
+    color: var(--ink-faint);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    text-align: center;
+    padding: 28px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .placeholder-hero { min-height: 280px; }
+  .placeholder-method { min-height: 220px; }
+
+  .placeholder .ph-title {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--ink-soft);
+    letter-spacing: 0.06em;
+  }
+
+  .placeholder .ph-note {
+    font-family: 'Source Serif 4', serif;
+    font-style: italic;
+    font-size: 0.85rem;
+    color: var(--ink-faint);
+    max-width: 460px;
+    line-height: 1.5;
+  }
+
+  /* ============ INTERACTIVE SLIDER ============ */
+  .compare-wrap {
+    max-width: var(--maxw-wide);
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  .scene-picker {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 24px;
+  }
+
+  .scene-btn {
+    padding: 8px 16px;
+    border: 1px solid var(--rule);
+    background: white;
+    border-radius: 100px;
+    font-family: 'Source Serif 4', serif;
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-style: italic;
+  }
+  .scene-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .scene-btn.active {
+    background: var(--ink);
+    color: white;
+    border-color: var(--ink);
+    font-style: normal;
+    font-weight: 500;
+  }
+
+  .compare-slider {
+    position: relative;
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto;
+    aspect-ratio: 1 / 1;
+    border-radius: 8px;
+    overflow: hidden;
+    user-select: none;
+    cursor: ew-resize;
+    background: #f5f0e6;
+    border: 1px solid var(--rule);
+  }
+
+  .compare-slider .layer {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .compare-slider .layer-bottom {
+    background-color: #2a2419;
+    background-image: linear-gradient(135deg, #2a2419 0%, #3a2f20 100%);
+  }
+
+  .compare-slider .layer-top {
+    background-color: #1c1814;
+    background-image: linear-gradient(135deg, #1c1814 0%, #2a241c 100%);
+    clip-path: inset(0 50% 0 0);
+  }
+
+  .compare-slider .layer-label {
+    position: absolute;
+    top: 16px;
+    padding: 5px 12px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-radius: 100px;
+    backdrop-filter: blur(4px);
+  }
+  .compare-slider .label-left { left: 16px; }
+  .compare-slider .label-right { right: 16px; background: var(--accent); }
+
+  .compare-slider .placeholder-text {
+    color: rgba(255, 255, 255, 0.4);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    text-align: center;
+    padding: 20px;
+  }
+
+  .slider-handle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: white;
+    transform: translateX(-50%);
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.2), 0 2px 8px rgba(0,0,0,0.3);
+    z-index: 10;
+    left: 50%;
+  }
+
+  .slider-handle::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 44px;
+    height: 44px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.15), 0 4px 12px rgba(0,0,0,0.25);
+  }
+
+  .slider-handle::before {
+    content: '⟨ ⟩';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--ink);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    z-index: 1;
+    letter-spacing: 0.1em;
+  }
+
+  .slider-hint {
+    text-align: center;
+    font-family: 'Source Serif 4', serif;
+    font-style: italic;
+    color: var(--ink-faint);
+    font-size: 0.88rem;
+    margin-top: 14px;
+  }
+
+  /* ============ SUBSAMPLING ============ */
+  .subsample-control {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .subsample-display {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 8px;
+    background: #f5f0e6;
+    border: 1px solid var(--rule);
+    overflow: hidden;
+    margin-bottom: 20px;
+    background-image: linear-gradient(135deg, #2a2419 0%, #3a2f20 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-size: cover;
+    background-position: center;
+  }
+
+  .subsample-display .ph {
+    color: rgba(255, 255, 255, 0.4);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+  }
+
+  .subsample-display .fraction-badge {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    padding: 6px 14px;
+    background: var(--accent);
+    color: white;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    border-radius: 100px;
+  }
+
+  .subsample-display .method-badge {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    padding: 6px 14px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-radius: 100px;
+  }
+
+  .subsample-slider-row {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .subsample-slider-row label {
+    font-family: 'Source Serif 4', serif;
+    font-style: italic;
+    color: var(--ink-soft);
+    min-width: 130px;
+    font-size: 0.95rem;
+  }
+
+  input[type="range"] {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 4px;
+    background: var(--rule);
+    border-radius: 2px;
+    outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  }
+
+  .method-toggle {
+    display: flex;
+    gap: 6px;
+    background: #fbf9f4;
+    border-radius: 100px;
+    padding: 4px;
+    border: 1px solid var(--rule);
+  }
+  .method-toggle button {
+    padding: 6px 16px;
+    border: none;
+    background: transparent;
+    border-radius: 100px;
+    font-family: 'Source Serif 4', serif;
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+    cursor: pointer;
+    font-style: italic;
+    transition: all 0.15s ease;
+  }
+  .method-toggle button.active {
+    background: var(--ink);
+    color: white;
+    font-style: normal;
+  }
+
+  /* ============ BIBTEX ============ */
+  .bibtex-wrap {
+    background: var(--ink);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .bibtex-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 16px;
+    background: #2a241c;
+    color: #d9d1c1;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.74rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .copy-btn {
+    background: transparent;
+    border: 1px solid #5a5249;
+    color: #d9d1c1;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .copy-btn:hover { background: var(--accent); color: white; border-color: var(--accent); }
+  pre.bibtex {
+    margin: 0;
+    padding: 18px 20px;
+    color: #e8d6a8;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    line-height: 1.6;
+    overflow-x: auto;
+  }
+
+  /* ============ FOOTER ============ */
+  footer {
+    padding: 40px 0 60px 0;
+    text-align: center;
+    color: var(--ink-faint);
+    font-size: 0.82rem;
+    font-style: italic;
+  }
+  footer img {
+    width: 32px;
+    height: 32px;
+    opacity: 0.45;
+    margin-bottom: 10px;
+  }
+
   @media (max-width: 720px) {
-    .frame { padding: 64px 24px 80px; }
-    h1 { font-size: 40px; }
-    .status { font-size: 10px; margin-bottom: 60px; }
-    .abstract { font-size: 17px; }
+    body { font-size: 17px; }
+    section { padding: 44px 0; }
+    .slider-handle::after { width: 36px; height: 36px; }
+    .subsample-slider-row { flex-wrap: wrap; }
+    .subsample-slider-row label { min-width: unset; }
+    .scene-btn { padding: 6px 12px; font-size: 0.85rem; }
   }
 </style>
 </head>
 <body>
 
-<div class="frame">
+<!-- ============ HERO ============ -->
+<header class="hero">
+  <div class="container">
+    <img src="moray-logo.png" alt="Moray" class="logo">
+    <div class="venue">Anonymous Submission · NeurIPS 2026</div>
 
-  <svg class="spectrum" viewBox="0 0 760 70" preserveAspectRatio="none" aria-hidden="true">
-    <defs>
-      <linearGradient id="fade" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0%"  stop-color="#e8a33a" stop-opacity="0"/>
-        <stop offset="15%" stop-color="#e8a33a" stop-opacity="1"/>
-        <stop offset="85%" stop-color="#e8a33a" stop-opacity="1"/>
-        <stop offset="100%" stop-color="#e8a33a" stop-opacity="0"/>
-      </linearGradient>
-    </defs>
-    <g id="bars" stroke="url(#fade)" stroke-width="1.2" stroke-linecap="round"></g>
-  </svg>
+    <h1 class="title">
+      <span class="moray-word">Moray</span>: Spectrally Parameterized<br>
+      Neural Inverse Reconstruction
+    </h1>
 
-  <h1>
-    <span class="name">Moray.</span><br>
-    Spectrally Parameterized<br>
-    Neural Inverse Reconstruction
-  </h1>
+    <p class="tagline">
+      Closed-form spectral forward models for coherent active sensing,
+      validated on real 77&nbsp;GHz FMCW radar.
+    </p>
 
-  <div class="status">
-    Anonymous Submission
+    <div class="authors">Anonymous Authors</div>
+    <div class="affiliation">Affiliation withheld for double-blind review</div>
+
+    <div class="links">
+      <a href="#" class="link-btn accent">Paper</a>
+      <a href="https://anno92590-hash.github.io" class="link-btn">Code &amp; Data</a>
+      <a href="#bibtex" class="link-btn">BibTeX</a>
+    </div>
   </div>
+</header>
 
-  <div class="section-label">Abstract</div>
 
-  <div class="abstract">
-    <p>In neural inverse reconstruction, the forward model is typically treated as a fixed simulator that maps a neural scene representation to measurements. This work studies how the parameterization of the forward operator itself shapes the optimization landscape of coherent inverse problems.</p>
-
-    <p>We introduce <strong>Moray</strong>, a reconstruction framework built on <em>spectrally parameterized forward operators</em> that bypass conventional time-domain synthesis and instead evaluate measurements directly through closed-form spectral kernels. This parameterization induces a substantially shorter and better-conditioned differentiable graph compared to time-domain approaches.</p>
-
-    <p>We further introduce <em>Phase-Coherent Manifold Parameterization</em>, a scene representation that jointly learns scene reflectivity and a deformable surface manifold, allowing the reconstruction to adapt to geometric deviations from the assumed imaging plane and thereby reducing common artifacts in coherent reconstruction.</p>
-
-    <p>We instantiate these ideas for 77&nbsp;GHz radar imaging using real measurements from a synthetic-aperture mmWave system. Across multiple challenging scenes, Moray consistently improves reconstruction fidelity, suppresses background artifacts, and degrades more gracefully under data limitations. More broadly, the results suggest that, in neural inverse problems, exposing the appropriate analytical structure of the sensing physics to the optimizer can be as important as the choice of neural representation itself.</p>
-  </div>
-
-  <footer>
-    Code &amp; data forthcoming
-  </footer>
-
+<!-- ============ HERO TEASER ============ -->
+<div class="hero-teaser">
+  <img src="images/hero/teaser.png" alt="Moray reconstructions"
+       style="width: 100%; border-radius: 6px; display: block;">
 </div>
 
+
+<!-- ============ ABSTRACT ============ -->
+<section>
+  <div class="container">
+    <h2>Abstract</h2>
+    <p>
+      How a fixed forward operator is <em>computed</em> in a differentiable
+      pipeline can be as important as the choice of neural representation
+      itself. We parameterize the forward model of a coherent sensing system
+      directly in the spectral domain, evaluating each measurement bin through
+      a closed-form kernel rather than synthesizing the full time-domain
+      signal. The result is a substantially shorter differentiable graph,
+      per-bin supervision, and a better-conditioned optimization landscape.
+      We pair this with <strong>Phase-Coherent Manifold Parameterization</strong>,
+      a scene representation that absorbs geometric mismatch between the
+      object surface and the assumed imaging plane — the source of
+      wavelength-scale fringe artifacts at 77&nbsp;GHz. On real radar
+      measurements across five objects, Moray consistently outperforms
+      classical and neural baselines.
+    </p>
+  </div>
+</section>
+
+
+<!-- ============ INTERACTIVE COMPARISON ============ -->
+<section>
+  <div class="container-wide">
+    <h2 style="text-align: center;">Drag to compare</h2>
+    <p style="text-align: center; color: var(--ink-soft); max-width: 540px; margin: 0 auto 28px auto;">
+      Classical coherent backprojection produces noisy, fringed reconstructions.
+      Moray suppresses both.
+    </p>
+
+    <div class="compare-wrap">
+
+      <div class="scene-picker">
+        <button class="scene-btn active" data-scene="scissor">Scissors</button>
+        <button class="scene-btn" data-scene="pliers">Pliers</button>
+        <button class="scene-btn" data-scene="pattern">Pattern</button>
+        <button class="scene-btn" data-scene="slicer">Slicer</button>
+        <button class="scene-btn" data-scene="siemensstar">Siemens Star</button>
+      </div>
+
+      <div class="compare-slider" id="compareSlider">
+        <div class="layer layer-bottom" id="layerBottom"
+             style="background-image: url(images/backproj/scissor.png);">
+          <div class="layer-label label-left">Backprojection</div>
+        </div>
+        <div class="layer layer-top" id="layerTop"
+             style="background-image: url(images/moray/scissor.png); clip-path: inset(0 50% 0 0);">
+          <div class="layer-label label-right">Moray</div>
+        </div>
+        <div class="slider-handle" id="sliderHandle"></div>
+      </div>
+
+      <div class="slider-hint">Drag the handle ⟨ ⟩ across the image. Click a scene above to switch object.</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============ METHOD TEASER ============ -->
+<section>
+  <div class="container">
+    <h2>The fringe artifact &amp; how we fix it</h2>
+    <p>
+      Under a coherent measurement, even sub-centimeter mismatch between the
+      object surface and the assumed imaging plane wraps into a periodic phase
+      pattern, which the optimizer faithfully reproduces as fringes set by the
+      carrier wavelength (~3.9&nbsp;mm at 77&nbsp;GHz). We resolve this by
+      jointly learning the reflectivity <em>and</em> a deformable surface
+      manifold — letting the reconstruction geometry adapt to where the
+      scatterers actually live.
+    </p>
+
+    <img src="images/method/pcmp_schematic.png" alt="PCMP schematic"
+         style="width: 100%; border-radius: 6px; display: block; margin-top: 24px;">
+  </div>
+</section>
+
+
+<!-- ============ APERTURE SUBSAMPLING ============ -->
+<section>
+  <div class="container-wide">
+    <h2 style="text-align: center;">Graceful degradation</h2>
+    <p style="text-align: center; color: var(--ink-soft); max-width: 540px; margin: 0 auto 28px auto;">
+      Slide to remove transmit positions. Moray degrades gracefully where
+      backprojection ghosts and aliases.
+    </p>
+
+    <div class="subsample-control">
+      <div class="subsample-display" id="subsampleDisplay"
+           style="background-image: url(images/subsampling/moray_75.png);">
+        <div class="method-badge" id="methodBadge">Moray</div>
+        <div class="fraction-badge" id="fractionBadge">75%</div>
+      </div>
+
+      <div class="subsample-slider-row">
+        <label>Aperture fraction</label>
+        <input type="range" id="fractionSlider" min="0" max="3" value="0" step="1">
+      </div>
+
+      <div class="subsample-slider-row">
+        <label>Method</label>
+        <div class="method-toggle">
+          <button class="active" data-method="moray">Moray</button>
+          <button data-method="backproj">Backprojection</button>
+        </div>
+      </div>
+
+      <p style="font-size: 0.85rem; color: var(--ink-faint); font-style: italic; margin-top: 16px; text-align: center;">
+        Pre-rendered at 75%, 50%, 25%, and 15% transmit positions (random subsampling).
+      </p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============ BIBTEX ============ -->
+<section id="bibtex">
+  <div class="container">
+    <h2>Citation</h2>
+    <p style="color: var(--ink-soft); font-size: 0.95rem;">
+      Citation will be updated upon acceptance and de-anonymization.
+    </p>
+
+    <div class="bibtex-wrap">
+      <div class="bibtex-header">
+        <span>BibTeX</span>
+        <button class="copy-btn" onclick="copyBibtex()">Copy</button>
+      </div>
+<pre class="bibtex" id="bibtex-content">@inproceedings{moray2026,
+  title     = {Moray: Spectrally Parameterized Neural Inverse Reconstruction},
+  author    = {Anonymous Authors},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2026},
+  note      = {Under review}
+}</pre>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <img src="moray-logo.png" alt="">
+  <div>Anonymous NeurIPS 2026 Submission</div>
+</footer>
+
+
 <script>
-  // Static spectrum — generated once on load, no animation
-  (function () {
-    const g = document.getElementById('bars');
-    const N = 120;
-    const W = 760;
-    const H = 70;
-    const step = W / N;
+  // ============ Comparison Slider ============
+  (function() {
+    const slider = document.getElementById('compareSlider');
+    const handle = document.getElementById('sliderHandle');
+    const layerTop = document.getElementById('layerTop');
+    let dragging = false;
 
-    // Deterministic pseudo-random so layout doesn't shift between reloads visually
-    let seed = 42;
-    function rand() {
-      seed = (seed * 9301 + 49297) % 233280;
-      return seed / 233280;
+    function setPosition(clientX) {
+      const rect = slider.getBoundingClientRect();
+      let x = clientX - rect.left;
+      x = Math.max(0, Math.min(rect.width, x));
+      const pct = (x / rect.width) * 100;
+      handle.style.left = pct + '%';
+      layerTop.style.clipPath = `inset(0 ${100 - pct}% 0 0)`;
     }
 
-    function envelope(i) {
-      const x = i / N;
-      const peak1 = Math.exp(-Math.pow((x - 0.32) * 9, 2)) * 0.85;
-      const peak2 = Math.exp(-Math.pow((x - 0.64) * 11, 2)) * 0.65;
-      const peak3 = Math.exp(-Math.pow((x - 0.78) * 22, 2)) * 0.40;
-      const floor = 0.06 + 0.04 * Math.sin(x * 19);
-      return Math.min(1, peak1 + peak2 + peak3 + floor + rand() * 0.08);
+    function start(e) {
+      dragging = true;
+      slider.style.cursor = 'grabbing';
+      const x = e.touches ? e.touches[0].clientX : e.clientX;
+      setPosition(x);
+      e.preventDefault();
+    }
+    function move(e) {
+      if (!dragging) return;
+      const x = e.touches ? e.touches[0].clientX : e.clientX;
+      setPosition(x);
+    }
+    function end() {
+      dragging = false;
+      slider.style.cursor = 'ew-resize';
     }
 
-    for (let i = 0; i < N; i++) {
-      const v = envelope(i);
-      const h = v * (H - 8);
-      const x = i * step + step / 2;
-      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-      line.setAttribute('x1', x.toFixed(2));
-      line.setAttribute('x2', x.toFixed(2));
-      line.setAttribute('y1', (H - h).toFixed(2));
-      line.setAttribute('y2', H);
-      g.appendChild(line);
-    }
+    slider.addEventListener('mousedown', start);
+    document.addEventListener('mousemove', move);
+    document.addEventListener('mouseup', end);
+    slider.addEventListener('touchstart', start, { passive: false });
+    document.addEventListener('touchmove', move, { passive: false });
+    document.addEventListener('touchend', end);
   })();
+
+  // ============ Scene Picker ============
+  (function() {
+    const buttons = document.querySelectorAll('.scene-btn');
+    const layerTop = document.getElementById('layerTop');
+    const layerBottom = document.getElementById('layerBottom');
+
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        buttons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const scene = btn.dataset.scene;
+
+        layerBottom.style.backgroundImage = `url(images/backproj/${scene}.png)`;
+        layerTop.style.backgroundImage = `url(images/moray/${scene}.png)`;
+      });
+    });
+  })();
+
+  // ============ Subsampling slider ============
+  (function() {
+    const fractionSlider = document.getElementById('fractionSlider');
+    const fractionBadge = document.getElementById('fractionBadge');
+    const methodBadge = document.getElementById('methodBadge');
+    const display = document.getElementById('subsampleDisplay');
+    const methodButtons = document.querySelectorAll('.method-toggle button');
+
+    const fractions = ['75%', '50%', '25%', '15%'];
+    const fractionFiles = ['75', '50', '25', '15'];
+    let currentMethod = 'moray';
+
+    function update() {
+      const idx = parseInt(fractionSlider.value);
+      fractionBadge.textContent = fractions[idx];
+      methodBadge.textContent = currentMethod === 'moray' ? 'Moray' : 'Backprojection';
+
+      display.style.backgroundImage = `url(images/subsampling/${currentMethod}_${fractionFiles[idx]}.png)`;
+    }
+
+    fractionSlider.addEventListener('input', update);
+    methodButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        methodButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentMethod = btn.dataset.method;
+        update();
+      });
+    });
+  })();
+
+  // ============ BibTeX copy ============
+  function copyBibtex() {
+    const text = document.getElementById('bibtex-content').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.querySelector('.copy-btn');
+      const original = btn.innerText;
+      btn.innerText = 'Copied ✓';
+      setTimeout(() => { btn.innerText = original; }, 1600);
+    });
+  }
 </script>
 
 </body>
