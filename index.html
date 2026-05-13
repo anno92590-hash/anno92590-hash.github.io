@@ -46,14 +46,6 @@
     text-align: center;
   }
 
-  .logo {
-    width: 96px;
-    height: 96px;
-    object-fit: contain;
-    margin-bottom: 20px;
-    filter: drop-shadow(0 3px 10px rgba(192, 138, 42, 0.15));
-  }
-
   .venue {
     display: inline-block;
     font-family: 'JetBrains Mono', monospace;
@@ -74,9 +66,11 @@
     max-width: 680px;
   }
 
-  .title .moray-word {
-    color: var(--accent);
-    font-style: italic;
+  .title-logo {
+    height: 0.95em;
+    vertical-align: -0.12em;
+    margin-right: 0.18em;
+    filter: drop-shadow(0 2px 6px rgba(192, 138, 42, 0.12));
   }
 
   .tagline {
@@ -152,75 +146,11 @@
     padding: 0 24px;
   }
 
-  .placeholder {
-    background: #fbf9f4;
-    border: 1px dashed var(--rule);
-    border-radius: 6px;
-    color: var(--ink-faint);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.78rem;
-    text-align: center;
-    padding: 28px 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-  }
-
-  .placeholder-hero { min-height: 280px; }
-  .placeholder-method { min-height: 220px; }
-
-  .placeholder .ph-title {
-    font-size: 0.78rem;
-    font-weight: 500;
-    color: var(--ink-soft);
-    letter-spacing: 0.06em;
-  }
-
-  .placeholder .ph-note {
-    font-family: 'Source Serif 4', serif;
-    font-style: italic;
-    font-size: 0.85rem;
-    color: var(--ink-faint);
-    max-width: 460px;
-    line-height: 1.5;
-  }
-
   /* ============ INTERACTIVE SLIDER ============ */
   .compare-wrap {
     max-width: var(--maxw-wide);
     margin: 0 auto;
     padding: 0 24px;
-  }
-
-  .scene-picker {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-bottom: 24px;
-  }
-
-  .scene-btn {
-    padding: 8px 16px;
-    border: 1px solid var(--rule);
-    background: white;
-    border-radius: 100px;
-    font-family: 'Source Serif 4', serif;
-    font-size: 0.9rem;
-    color: var(--ink-soft);
-    cursor: pointer;
-    transition: all 0.15s ease;
-    font-style: italic;
-  }
-  .scene-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .scene-btn.active {
-    background: var(--ink);
-    color: white;
-    border-color: var(--ink);
-    font-style: normal;
-    font-weight: 500;
   }
 
   .compare-slider {
@@ -274,14 +204,6 @@
   }
   .compare-slider .label-left { left: 16px; }
   .compare-slider .label-right { right: 16px; background: var(--accent); }
-
-  .compare-slider .placeholder-text {
-    color: rgba(255, 255, 255, 0.4);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.85rem;
-    text-align: center;
-    padding: 20px;
-  }
 
   .slider-handle {
     position: absolute;
@@ -337,30 +259,7 @@
     margin: 0 auto;
   }
 
-  .subsample-display {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 1 / 1;
-    border-radius: 8px;
-    background: #f5f0e6;
-    border: 1px solid var(--rule);
-    overflow: hidden;
-    margin-bottom: 20px;
-    background-image: linear-gradient(135deg, #2a2419 0%, #3a2f20 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-size: cover;
-    background-position: center;
-  }
-
-  .subsample-display .ph {
-    color: rgba(255, 255, 255, 0.4);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.85rem;
-  }
-
-  .subsample-display .fraction-badge {
+  .fraction-badge {
     position: absolute;
     top: 16px;
     right: 16px;
@@ -371,20 +270,7 @@
     font-size: 0.78rem;
     letter-spacing: 0.06em;
     border-radius: 100px;
-  }
-
-  .subsample-display .method-badge {
-    position: absolute;
-    top: 16px;
-    left: 16px;
-    padding: 6px 14px;
-    background: rgba(0,0,0,0.7);
-    color: white;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.72rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    border-radius: 100px;
+    z-index: 11;
   }
 
   .subsample-slider-row {
@@ -429,32 +315,6 @@
     cursor: pointer;
     border: none;
     box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  }
-
-  .method-toggle {
-    display: flex;
-    gap: 6px;
-    background: #fbf9f4;
-    border-radius: 100px;
-    padding: 4px;
-    border: 1px solid var(--rule);
-  }
-  .method-toggle button {
-    padding: 6px 16px;
-    border: none;
-    background: transparent;
-    border-radius: 100px;
-    font-family: 'Source Serif 4', serif;
-    font-size: 0.88rem;
-    color: var(--ink-soft);
-    cursor: pointer;
-    font-style: italic;
-    transition: all 0.15s ease;
-  }
-  .method-toggle button.active {
-    background: var(--ink);
-    color: white;
-    font-style: normal;
   }
 
   /* ============ BIBTEX ============ */
@@ -518,7 +378,6 @@
     .slider-handle::after { width: 36px; height: 36px; }
     .subsample-slider-row { flex-wrap: wrap; }
     .subsample-slider-row label { min-width: unset; }
-    .scene-btn { padding: 6px 12px; font-size: 0.85rem; }
   }
 </style>
 </head>
@@ -527,11 +386,11 @@
 <!-- ============ HERO ============ -->
 <header class="hero">
   <div class="container">
-    <img src="moray-logo.png" alt="Moray" class="logo">
     <div class="venue">Anonymous Submission · NeurIPS 2026</div>
 
     <h1 class="title">
-      <span class="moray-word">Moray</span>: Spectrally Parameterized<br>
+      <img src="moray-logo.png" alt="Moray" class="title-logo">
+      Spectrally Parameterized<br>
       Neural Inverse Reconstruction
     </h1>
 
@@ -593,14 +452,6 @@
 
     <div class="compare-wrap">
 
-      <div class="scene-picker">
-        <button class="scene-btn active" data-scene="scissor">Scissors</button>
-        <button class="scene-btn" data-scene="pliers">Pliers</button>
-        <button class="scene-btn" data-scene="pattern">Pattern</button>
-        <button class="scene-btn" data-scene="slicer">Slicer</button>
-        <button class="scene-btn" data-scene="siemensstar">Siemens Star</button>
-      </div>
-
       <div class="compare-slider" id="compareSlider">
         <div class="layer layer-bottom" id="layerBottom"
              style="background-image: url(images/backproj/scissor.png);">
@@ -613,7 +464,7 @@
         <div class="slider-handle" id="sliderHandle"></div>
       </div>
 
-      <div class="slider-hint">Drag the handle ⟨ ⟩ across the image. Click a scene above to switch object.</div>
+      <div class="slider-hint">Drag the handle ⟨ ⟩ across the image.</div>
     </div>
   </div>
 </section>
@@ -644,28 +495,28 @@
   <div class="container-wide">
     <h2 style="text-align: center;">Graceful degradation</h2>
     <p style="text-align: center; color: var(--ink-soft); max-width: 540px; margin: 0 auto 28px auto;">
-      Slide to remove transmit positions. Moray degrades gracefully where
-      backprojection ghosts and aliases.
+      Drag the handle to compare Backprojection and Moray at the same
+      aperture fraction. Moray degrades gracefully where backprojection
+      ghosts and aliases.
     </p>
 
     <div class="subsample-control">
-      <div class="subsample-display" id="subsampleDisplay"
-           style="background-image: url(images/subsampling/moray_75.png);">
-        <div class="method-badge" id="methodBadge">Moray</div>
+      <div class="compare-slider" id="subsampleCompare">
+        <div class="layer layer-bottom" id="subsampleLayerBP"
+             style="background-image: url(images/subsampling/backproj_75.png);">
+          <div class="layer-label label-left">Backprojection</div>
+        </div>
+        <div class="layer layer-top" id="subsampleLayerMoray"
+             style="background-image: url(images/subsampling/moray_75.png); clip-path: inset(0 50% 0 0);">
+          <div class="layer-label label-right">Moray</div>
+        </div>
+        <div class="slider-handle" id="subsampleHandle"></div>
         <div class="fraction-badge" id="fractionBadge">75%</div>
       </div>
 
-      <div class="subsample-slider-row">
+      <div class="subsample-slider-row" style="margin-top: 20px;">
         <label>Aperture fraction</label>
         <input type="range" id="fractionSlider" min="0" max="3" value="0" step="1">
-      </div>
-
-      <div class="subsample-slider-row">
-        <label>Method</label>
-        <div class="method-toggle">
-          <button class="active" data-method="moray">Moray</button>
-          <button data-method="backproj">Backprojection</button>
-        </div>
       </div>
 
       <p style="font-size: 0.85rem; color: var(--ink-faint); font-style: italic; margin-top: 16px; text-align: center;">
@@ -709,13 +560,9 @@
 
 
 <script>
-  // ============ Comparison Slider ============
-  (function() {
-    const slider = document.getElementById('compareSlider');
-    const handle = document.getElementById('sliderHandle');
-    const layerTop = document.getElementById('layerTop');
+  // ============ Drag-to-compare helper ============
+  function setupCompareSlider(slider, handle, layerTop) {
     let dragging = false;
-
     function setPosition(clientX) {
       const rect = slider.getBoundingClientRect();
       let x = clientX - rect.left;
@@ -724,7 +571,6 @@
       handle.style.left = pct + '%';
       layerTop.style.clipPath = `inset(0 ${100 - pct}% 0 0)`;
     }
-
     function start(e) {
       dragging = true;
       slider.style.cursor = 'grabbing';
@@ -741,61 +587,42 @@
       dragging = false;
       slider.style.cursor = 'ew-resize';
     }
-
     slider.addEventListener('mousedown', start);
     document.addEventListener('mousemove', move);
     document.addEventListener('mouseup', end);
     slider.addEventListener('touchstart', start, { passive: false });
     document.addEventListener('touchmove', move, { passive: false });
     document.addEventListener('touchend', end);
-  })();
+  }
 
-  // ============ Scene Picker ============
-  (function() {
-    const buttons = document.querySelectorAll('.scene-btn');
-    const layerTop = document.getElementById('layerTop');
-    const layerBottom = document.getElementById('layerBottom');
+  // Hero comparison slider (scissor only)
+  setupCompareSlider(
+    document.getElementById('compareSlider'),
+    document.getElementById('sliderHandle'),
+    document.getElementById('layerTop')
+  );
 
-    buttons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        buttons.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const scene = btn.dataset.scene;
+  // Subsampling comparison slider (BP vs Moray at chosen fraction)
+  setupCompareSlider(
+    document.getElementById('subsampleCompare'),
+    document.getElementById('subsampleHandle'),
+    document.getElementById('subsampleLayerMoray')
+  );
 
-        layerBottom.style.backgroundImage = `url(images/backproj/${scene}.png)`;
-        layerTop.style.backgroundImage = `url(images/moray/${scene}.png)`;
-      });
-    });
-  })();
-
-  // ============ Subsampling slider ============
+  // ============ Subsampling fraction slider ============
   (function() {
     const fractionSlider = document.getElementById('fractionSlider');
     const fractionBadge = document.getElementById('fractionBadge');
-    const methodBadge = document.getElementById('methodBadge');
-    const display = document.getElementById('subsampleDisplay');
-    const methodButtons = document.querySelectorAll('.method-toggle button');
-
+    const layerBP = document.getElementById('subsampleLayerBP');
+    const layerMoray = document.getElementById('subsampleLayerMoray');
     const fractions = ['75%', '50%', '25%', '15%'];
     const fractionFiles = ['75', '50', '25', '15'];
-    let currentMethod = 'moray';
 
-    function update() {
+    fractionSlider.addEventListener('input', () => {
       const idx = parseInt(fractionSlider.value);
       fractionBadge.textContent = fractions[idx];
-      methodBadge.textContent = currentMethod === 'moray' ? 'Moray' : 'Backprojection';
-
-      display.style.backgroundImage = `url(images/subsampling/${currentMethod}_${fractionFiles[idx]}.png)`;
-    }
-
-    fractionSlider.addEventListener('input', update);
-    methodButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        methodButtons.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentMethod = btn.dataset.method;
-        update();
-      });
+      layerBP.style.backgroundImage    = `url(images/subsampling/backproj_${fractionFiles[idx]}.png)`;
+      layerMoray.style.backgroundImage = `url(images/subsampling/moray_${fractionFiles[idx]}.png)`;
     });
   })();
 
