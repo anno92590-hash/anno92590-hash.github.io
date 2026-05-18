@@ -244,13 +244,24 @@
     letter-spacing: 0.1em;
   }
 
-  .slider-hint {
-    text-align: center;
+  .slider-caption {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 720px;
+    margin: 14px auto 0 auto;
+    padding: 0 4px;
     font-family: 'Source Serif 4', serif;
     font-style: italic;
-    color: var(--ink-faint);
-    font-size: 0.88rem;
-    margin-top: 14px;
+    font-size: 0.92rem;
+    color: var(--ink-soft);
+  }
+  .slider-caption .caption-right { color: var(--accent); }
+  .slider-caption .arrow {
+    display: inline-block;
+    font-style: normal;
+    margin: 0 0.3em;
+    opacity: 0.85;
   }
 
   /* ============ SUBSAMPLING ============ */
@@ -574,8 +585,8 @@
 </section>
 
 
-============ INTERACTIVE COMPARISON ============
-<section>
+<!-- ============ INTERACTIVE COMPARISON ============ -->
+<!-- <section>
   <div class="container-wide">
     <h2 style="text-align: center;">Drag to compare</h2>
     <p style="text-align: center; color: var(--ink-soft); max-width: 540px; margin: 0 auto 28px auto;">
@@ -597,10 +608,13 @@
         <div class="slider-handle" id="sliderHandle"></div>
       </div>
 
-      <div class="slider-hint">Drag the handle ⟨ ⟩ across the image.</div>
+      <div class="slider-caption">
+        <span class="caption-left"><span class="arrow">←</span>Backprojection</span>
+        <span class="caption-right">Moray<span class="arrow">→</span></span>
+      </div>
     </div>
   </div>
-</section>
+</section> -->
 
 
 <!-- ============ METHOD TEASER ============ -->
@@ -629,7 +643,10 @@
       <div class="slider-handle" id="methodHandle"></div>
     </div>
 
-    <div class="slider-hint">Drag the handle ⟨ ⟩ to compare reconstructions with and without PCMP.</div>
+    <div class="slider-caption">
+      <span class="caption-left"><span class="arrow">←</span>Without PCMP</span>
+      <span class="caption-right">With PCMP<span class="arrow">→</span></span>
+    </div>
   </div>
 </section>
 
@@ -656,6 +673,11 @@
         </div>
         <div class="slider-handle" id="subsampleHandle"></div>
         <div class="fraction-badge" id="fractionBadge">75%</div>
+      </div>
+
+      <div class="slider-caption">
+        <span class="caption-left"><span class="arrow">←</span>Backprojection</span>
+        <span class="caption-right">Moray<span class="arrow">→</span></span>
       </div>
 
       <div class="subsample-slider-row" style="margin-top: 20px;">
@@ -706,6 +728,10 @@
 <script>
   // ============ Drag-to-compare helper ============
   function setupCompareSlider(slider, handle, layerTop) {
+    // No-op if the target slider isn't in the DOM (e.g. the section is
+    // commented out). Without this guard, a missing slider would throw
+    // and prevent every later slider from being wired up.
+    if (!slider || !handle || !layerTop) return;
     let dragging = false;
     function setPosition(clientX) {
       const rect = slider.getBoundingClientRect();
@@ -739,13 +765,6 @@
     document.addEventListener('touchend', end);
   }
 
-  // Hero comparison slider (scissor only)
-  setupCompareSlider(
-    document.getElementById('compareSlider'),
-    document.getElementById('sliderHandle'),
-    document.getElementById('layerTop')
-  );
-
   // Method-teaser comparison slider (without PCMP vs with PCMP)
   setupCompareSlider(
     document.getElementById('methodCompare'),
@@ -759,6 +778,11 @@
     document.getElementById('subsampleHandle'),
     document.getElementById('subsampleLayerMoray')
   );
+
+  // The hero "Drag to compare" slider in the INTERACTIVE COMPARISON
+  // section is currently commented out in the HTML; the null guard above
+  // makes setupCompareSlider safe to re-introduce here when that section
+  // is restored.
 
   // ============ Subsampling fraction slider ============
   (function() {
