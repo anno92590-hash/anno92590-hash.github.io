@@ -526,19 +526,19 @@
     </p>
     <div class="anim-grid">
       <figure>
-        <video src="videos/data_collection.mp4" autoplay muted loop playsinline></video>
+        <video src="videos/data_collection.mp4" autoplay muted loop playsinline preload="auto"></video>
         <figcaption>Synthetic-aperture acquisition: a single radar rasters a scan plane.</figcaption>
       </figure>
       <figure>
-        <video src="videos/signal_propagation.mp4" autoplay muted loop playsinline></video>
+        <video src="videos/signal_propagation.mp4" autoplay muted loop playsinline preload="auto"></video>
         <figcaption>FMCW signal propagation: round-trip time encodes scene geometry.</figcaption>
       </figure>
       <figure>
-        <video src="videos/pcmp_manifold.mp4" autoplay muted loop playsinline></video>
+        <video src="videos/pcmp_manifold.mp4" autoplay muted loop playsinline preload="auto"></video>
         <figcaption>PCMP: the imaging plane deforms to follow the object surface.</figcaption>
       </figure>
       <figure>
-        <video src="videos/inr_reconstruction.mp4" autoplay muted loop playsinline></video>
+        <video src="videos/inr_reconstruction.mp4" autoplay muted loop playsinline preload="auto"></video>
         <figcaption>Neural inverse reconstruction: optimize the scene to fit measurements.</figcaption>
       </figure>
     </div>
@@ -798,6 +798,58 @@
       fractionBadge.textContent = fractions[idx];
       layerBP.style.backgroundImage    = `url(images/subsampling/backproj_${fractionFiles[idx]}.png)`;
       layerMoray.style.backgroundImage = `url(images/subsampling/moray_${fractionFiles[idx]}.png)`;
+    });
+  })();
+
+  // ============ Robust video autoplay ============
+  // Defensive: many browsers (especially Safari and Chrome under power-
+  // saving) ignore the `autoplay` attribute even with `muted`. Strategy:
+  //   1. JS-side enforce muted / playsInline (HTML attrs are advisory).
+  //   2. Call .play() right away; if it rejects, that's expected — we
+  //      don't gate on it.
+  //   3. Retry on IntersectionObserver (video scrolls into view).
+  //   4. Retry on first user interaction of any kind.
+  //   5. Retry on tab-focus regain.
+  (function() {
+    const videos = document.querySelectorAll('video[autoplay]');
+    if (!videos.length) return;
+
+    videos.forEach(v => {
+      v.muted = true;
+      v.defaultMuted = true;
+      v.playsInline = true;
+      v.setAttribute('muted', '');
+      v.setAttribute('playsinline', '');
+    });
+
+    const tryPlay = v => { v.play().catch(() => {}); };
+    const playAll = () => videos.forEach(tryPlay);
+
+    // First attempt: right now (does not require user gesture if browser
+    // is willing). Then again after window load, when buffering is more
+    // likely complete.
+    playAll();
+    window.addEventListener('load', playAll, { once: true });
+
+    // Retry when each video scrolls into view. This counts as an
+    // "engagement signal" with many browsers' autoplay heuristics.
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) tryPlay(e.target); });
+      }, { threshold: 0.1 });
+      videos.forEach(v => io.observe(v));
+    }
+
+    // Retry on first user interaction — once granted, autoplay typically
+    // unlocks for the rest of the page session.
+    const onceOpts = { once: true, passive: true };
+    ['pointerdown', 'click', 'touchstart', 'keydown', 'scroll'].forEach(evt =>
+      document.addEventListener(evt, playAll, onceOpts)
+    );
+
+    // Retry on tab refocus.
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) playAll();
     });
   })();
 
