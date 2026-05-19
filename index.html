@@ -209,6 +209,7 @@
     text-transform: uppercase;
     border-radius: 100px;
     backdrop-filter: blur(4px);
+    transition: opacity 0.12s ease;
   }
   .compare-slider .label-left { left: 16px; }
   .compare-slider .label-right { right: 16px; background: var(--accent); }
@@ -964,7 +965,7 @@
           happen to be available.
         </p>
         <p>
-          We reduce the number of Tx in the  aperture down to 75%, 50%, 25%, and
+          We reduce the number of Tx in the  aperture down to 50%, 25%, and
           15% by random subsampling and reconstruct from the remaining
           positions.
           <strong>Backprojection</strong> creates ghost and aliasing artifacts. <strong>Moray</strong>
@@ -978,20 +979,19 @@
       <div class="split-media">
         <div class="compare-slider" id="subsampleCompare" style="max-width: 380px;">
           <div class="layer layer-bottom" id="subsampleLayerBP"
-               style="background-image: url(images/subsampling/backproj_75.png);"></div>
+               style="background-image: url(images/subsampling/backproj_50.png);"></div>
           <div class="layer layer-top" id="subsampleLayerMoray"
-               style="background-image: url(images/subsampling/moray_75.png); clip-path: inset(0 50% 0 0);"></div>
+               style="background-image: url(images/subsampling/moray_50.png); clip-path: inset(0 50% 0 0);"></div>
           <div class="slider-handle" id="subsampleHandle"></div>
-          <div class="fraction-badge" id="fractionBadge">75%</div>
+          <div class="fraction-badge" id="fractionBadge">50%</div>
           <div class="layer-label label-bl">Moray</div>
           <div class="layer-label label-br">Backprojection</div>
         </div>
 
         <div class="fraction-control">
           <label>Aperture fraction</label>
-          <input type="range" id="fractionSlider" min="0" max="3" value="0" step="1">
+          <input type="range" id="fractionSlider" min="0" max="2" value="0" step="1">
           <div class="fraction-ticks">
-            <span>75%</span>
             <span>50%</span>
             <span>25%</span>
             <span>15%</span>
@@ -1042,6 +1042,11 @@
     // commented out). Without this guard, a missing slider would throw
     // and prevent every later slider from being wired up.
     if (!slider || !handle || !layerTop) return;
+    // Optional bottom-corner labels — fade them out as the handle sweeps
+    // across each label's x-range. BL fades as handle moves R→L past it;
+    // BR fades as handle moves L→R past it. CSS `transition` smooths it.
+    const labelBL = slider.querySelector('.label-bl');
+    const labelBR = slider.querySelector('.label-br');
     let dragging = false;
     function setPosition(clientX) {
       const rect = slider.getBoundingClientRect();
@@ -1050,6 +1055,25 @@
       const pct = (x / rect.width) * 100;
       handle.style.left = pct + '%';
       layerTop.style.clipPath = `inset(0 ${100 - pct}% 0 0)`;
+
+      if (labelBL) {
+        const b = labelBL.getBoundingClientRect();
+        const left = b.left - rect.left;
+        const right = b.right - rect.left;
+        // opacity 0 if handle is at/left of label's left edge,
+        // opacity 1 if handle is at/right of label's right edge.
+        labelBL.style.opacity =
+          Math.max(0, Math.min(1, (x - left) / Math.max(1, right - left)));
+      }
+      if (labelBR) {
+        const b = labelBR.getBoundingClientRect();
+        const left = b.left - rect.left;
+        const right = b.right - rect.left;
+        // opacity 1 if handle is at/left of label's left edge,
+        // opacity 0 if handle is at/right of label's right edge.
+        labelBR.style.opacity =
+          Math.max(0, Math.min(1, (right - x) / Math.max(1, right - left)));
+      }
     }
     function start(e) {
       dragging = true;
@@ -1105,8 +1129,8 @@
     const fractionBadge = document.getElementById('fractionBadge');
     const layerBP = document.getElementById('subsampleLayerBP');
     const layerMoray = document.getElementById('subsampleLayerMoray');
-    const fractions = ['75%', '50%', '25%', '15%'];
-    const fractionFiles = ['75', '50', '25', '15'];
+    const fractions = ['50%', '25%', '15%'];
+    const fractionFiles = ['50', '25', '15'];
 
     fractionSlider.addEventListener('input', () => {
       const idx = parseInt(fractionSlider.value);
